@@ -12,7 +12,6 @@ float4 _MainTex_ST, _DetailTex_ST;
 
 sampler2D _NormalMap, _DetailNormalMap;
 float _BumpScale, _DetailBumpScale;
-//float4 _HeightMap_TexelSize;
 
 float _Metallic;
 float _Smoothness;
@@ -71,7 +70,7 @@ Interpolators MyVertexProgram (VertexData v) {
 		i.tangent = UnityObjectToWorldDir(v.tangent.xyz);
 		i.binormal = CreateBinormal(i.normal, i.tangent, v.tangent.w);
 	#endif
-
+		
 	i.uv.xy = TRANSFORM_TEX(v.uv, _MainTex);
 	i.uv.zw = TRANSFORM_TEX(v.uv, _DetailTex);
 	ComputeVertexLightColor(i);
@@ -110,20 +109,22 @@ UnityIndirect CreateIndirectLight (Interpolators i) {
 }
 
 void InitializeFragmentNormal(inout Interpolators i) {
-	float3 mainNormal = UnpackScaleNormal(tex2D(_NormalMap, i.uv.xy), _BumpScale);
-	float3 detailNormal = UnpackScaleNormal(tex2D(_DetailNormalMap, i.uv.zw), _DetailBumpScale);
+	float3 mainNormal =
+		UnpackScaleNormal(tex2D(_NormalMap, i.uv.xy), _BumpScale);
+	float3 detailNormal =
+		UnpackScaleNormal(tex2D(_DetailNormalMap, i.uv.zw), _DetailBumpScale);
 	float3 tangentSpaceNormal = BlendNormals(mainNormal, detailNormal);
 
 	#if defined(BINORMAL_PER_FRAGMENT)
-		float3 binormal = cross(i.normal, i.tangent.xyz) * (i.tangent.w * unity_WorldTransformParams.w);
+		float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
 	#else
 		float3 binormal = i.binormal;
 	#endif
-
+	
 	i.normal = normalize(
 		tangentSpaceNormal.x * i.tangent +
 		tangentSpaceNormal.y * binormal +
-		tangentSpaceNormal.z * i.normal 
+		tangentSpaceNormal.z * i.normal
 	);
 }
 

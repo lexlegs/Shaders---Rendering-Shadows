@@ -1,6 +1,7 @@
-﻿Shader "Custom/My First Lighting Shader" {
-
-	Properties {
+﻿Shader "Custom/My First Lighting Shader"
+{
+	Properties 
+	{
 		_Tint ("Tint", Color) = (1, 1, 1, 1)
 		_MainTex ("Albedo", 2D) = "white" {}
 		[NoScaleOffset] _NormalMap ("Normals", 2D) = "bump" {}
@@ -18,10 +19,13 @@
 
 	ENDCG
 
-	SubShader {
+	SubShader
+	{
 
-		Pass {
-			Tags {
+		Pass
+		{
+			Tags
+			{
 				"LightMode" = "ForwardBase"
 			}
 
@@ -41,8 +45,10 @@
 			ENDCG
 		}
 
-		Pass {
-			Tags {
+		Pass
+		{
+			Tags 
+			{
 				"LightMode" = "ForwardAdd"
 			}
 
@@ -59,6 +65,25 @@
 			#pragma fragment MyFragmentProgram
 
 			#include "My Lighting.cginc"
+
+			ENDCG
+		}
+
+		Pass
+		{
+			Tags
+			{
+				"LightMode" = "ShadowCaster"
+			}
+
+			CGPROGRAM
+
+			#pragma target 3.0
+
+			#pragma vertex MyShadowVertexProgram
+			#pragma fragment MyShadowFragmentProgram
+
+			#include "My Shadows.cginc"
 
 			ENDCG
 		}
