@@ -16,14 +16,16 @@ float _BumpScale, _DetailBumpScale;
 float _Metallic;
 float _Smoothness;
 
-struct VertexData {
+struct VertexData
+{
 	float4 position : POSITION;
 	float3 normal : NORMAL;
 	float4 tangent : TANGENT;
 	float2 uv : TEXCOORD0;
 };
 
-struct Interpolators {
+struct Interpolators 
+{
 	float4 position : SV_POSITION;
 	float4 uv : TEXCOORD0;
 	float3 normal : TEXCOORD1;
@@ -37,12 +39,17 @@ struct Interpolators {
 
 	float3 worldPos : TEXCOORD4;
 
+	#if defined(SHADOWS_SCREEN)
+		float4 = shadowCoordinates : TEXCOORD5;
+	#endif
+
 	#if defined(VERTEXLIGHT_ON)
 		float3 vertexLightColor : TEXCOORD5;
 	#endif
 };
 
-void ComputeVertexLightColor (inout Interpolators i) {
+void ComputeVertexLightColor (inout Interpolators i) 
+{
 	#if defined(VERTEXLIGHT_ON)
 		i.vertexLightColor = Shade4PointLights(
 			unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
@@ -53,12 +60,14 @@ void ComputeVertexLightColor (inout Interpolators i) {
 	#endif
 }
 
-float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign) {
+float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign)
+{
 	return cross(normal, tangent.xyz) *
 		(binormalSign * unity_WorldTransformParams.w);
 }
 
-Interpolators MyVertexProgram (VertexData v) {
+Interpolators MyVertexProgram (VertexData v)
+{
 	Interpolators i;
 	i.position = UnityObjectToClipPos(v.position);
 	i.worldPos = mul(unity_ObjectToWorld, v.position);
@@ -73,11 +82,18 @@ Interpolators MyVertexProgram (VertexData v) {
 		
 	i.uv.xy = TRANSFORM_TEX(v.uv, _MainTex);
 	i.uv.zw = TRANSFORM_TEX(v.uv, _DetailTex);
+
+	#if defined(SHADOWS_SCREEN)
+		i.shadowCoordinates.xy = (i.position.xy + i.position.w) * 0.5; // / i.position.w;
+		i.shadowCoordinates.zw = i.position.zw;
+	#endif
+
 	ComputeVertexLightColor(i);
 	return i;
 }
 
-UnityLight CreateLight (Interpolators i) {
+UnityLight CreateLight (Interpolators i) 
+{
 	UnityLight light;
 
 	#if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
@@ -85,14 +101,20 @@ UnityLight CreateLight (Interpolators i) {
 	#else
 		light.dir = _WorldSpaceLightPos0.xyz;
 	#endif
+
+	#if defined(SHADOWS_SCREEN)
+		float attenuation = tex2d(_ShadowMapTexture, i.shadowCoordinates.xy / i.shadowCoordinates.w);
+	#else
+		UNITY_LIGHT_ATTENUATION(attenuation, 0, i.worldPos);
+	#endif
 	
-	UNITY_LIGHT_ATTENUATION(attenuation, 0, i.worldPos);
 	light.color = _LightColor0.rgb * attenuation;
 	light.ndotl = DotClamped(i.normal, light.dir);
 	return light;
 }
 
-UnityIndirect CreateIndirectLight (Interpolators i) {
+UnityIndirect CreateIndirectLight (Interpolators i)
+{
 	UnityIndirect indirectLight;
 	indirectLight.diffuse = 0;
 	indirectLight.specular = 0;
@@ -108,7 +130,8 @@ UnityIndirect CreateIndirectLight (Interpolators i) {
 	return indirectLight;
 }
 
-void InitializeFragmentNormal(inout Interpolators i) {
+void InitializeFragmentNormal(inout Interpolators i)
+{
 	float3 mainNormal =
 		UnpackScaleNormal(tex2D(_NormalMap, i.uv.xy), _BumpScale);
 	float3 detailNormal =
@@ -128,7 +151,8 @@ void InitializeFragmentNormal(inout Interpolators i) {
 	);
 }
 
-float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
+float4 MyFragmentProgram (Interpolators i) : SV_TARGET 
+{
 	InitializeFragmentNormal(i);
 
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);

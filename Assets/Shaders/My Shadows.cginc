@@ -8,11 +8,12 @@
 struct VertexData
 {
     float4 position : POSITION;
+	float3 normal : NORMAL;
 };
 
 float4 MyShadowVertexProgram (VertexData v) : SV_POSITION 
 {
-	float4 position = mul(UNITY_MATRIX_MVP, v.position);
+	float4 position = UnityClipSpaceShadowCasterPos(v.position.xyz, v.normal);
 	return UnityApplyLinearShadowBias(position);
 }
 
