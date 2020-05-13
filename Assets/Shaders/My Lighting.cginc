@@ -1,10 +1,13 @@
 ﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 #if !defined(MY_LIGHTING_INCLUDED)
 #define MY_LIGHTING_INCLUDED
 
-#include "AutoLight.cginc"
 #include "UnityPBSLighting.cginc"
+#include "AutoLight.cginc"
+//#include "UnityPBSLighting.cginc"
 
 float4 _Tint;
 sampler2D _MainTex, _DetailTex;
@@ -18,7 +21,7 @@ float _Smoothness;
 
 struct VertexData
 {
-	float4 position : POSITION;
+	float4 vertex : POSITION;
 	float3 normal : NORMAL;
 	float4 tangent : TANGENT;
 	float2 uv : TEXCOORD0;
@@ -26,7 +29,7 @@ struct VertexData
 
 struct Interpolators 
 {
-	float4 position : SV_POSITION;
+	float4 pos : SV_POSITION;
 	float4 uv : TEXCOORD0;
 	float3 normal : TEXCOORD1;
 
@@ -70,8 +73,8 @@ float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign)
 Interpolators MyVertexProgram (VertexData v)
 {
 	Interpolators i;
-	i.position = UnityObjectToClipPos(v.position);
-	i.worldPos = mul(unity_ObjectToWorld, v.position);
+	i.pos = UnityObjectToClipPos(v.vertex);
+	i.worldPos = mul(unity_ObjectToWorld, v.vertex);
 	i.normal = UnityObjectToWorldNormal(v.normal);
 
 	#if defined(BINORMAL_PER_FRAGMENT)

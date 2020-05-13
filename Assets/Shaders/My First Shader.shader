@@ -1,9 +1,9 @@
 ﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Custom/My First Shader" 
+Shader "Custom/My First Shader"
 {
 
-	Properties
+	Properties 
 	{
 		_Tint ("Tint", Color) = (1, 1, 1, 1)
 		_MainTex ("Texture", 2D) = "white" {}
@@ -25,7 +25,7 @@ Shader "Custom/My First Shader"
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 
-			struct VertexData
+			struct VertexData 
 			{
 				float4 position : POSITION;
 				float2 uv : TEXCOORD0;

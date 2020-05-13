@@ -1,6 +1,7 @@
-﻿Shader "Custom/My First Lighting Shader"
+﻿Shader "Custom/My First Lighting Shader" 
 {
-	Properties 
+
+	Properties
 	{
 		_Tint ("Tint", Color) = (1, 1, 1, 1)
 		_MainTex ("Albedo", 2D) = "white" {}
@@ -24,7 +25,7 @@
 
 		Pass
 		{
-			Tags
+			Tags 
 			{
 				"LightMode" = "ForwardBase"
 			}
@@ -33,6 +34,7 @@
 
 			#pragma target 3.0
 
+			#pragma multi_compile _ SHADOWS_SCREEN
 			#pragma multi_compile _ VERTEXLIGHT_ON
 
 			#pragma vertex MyVertexProgram
@@ -47,7 +49,7 @@
 
 		Pass
 		{
-			Tags 
+			Tags
 			{
 				"LightMode" = "ForwardAdd"
 			}
@@ -59,9 +61,8 @@
 
 			#pragma target 3.0
 
-			#pragma multi_compile_SHADOWS_SCREEN
-			#pragma multi_compile_VERTEXLIGHT_ON
-
+			#pragma multi_compile_fwdadd_fullshadows
+			
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
 
@@ -80,6 +81,8 @@
 			CGPROGRAM
 
 			#pragma target 3.0
+
+			#pragma multi_compile_shadowcaster
 
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
