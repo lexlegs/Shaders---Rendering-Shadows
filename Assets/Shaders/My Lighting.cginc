@@ -39,9 +39,10 @@ struct Interpolators
 
 	float3 worldPos : TEXCOORD4;
 
-	#if defined(SHADOWS_SCREEN)
-		float4 = shadowCoordinates : TEXCOORD5;
-	#endif
+	//#if defined(SHADOWS_SCREEN)
+		//float4 = shadowCoordinates : TEXCOORD5;
+	//#endif
+	SHADOW_COORDS(5)
 
 	#if defined(VERTEXLIGHT_ON)
 		float3 vertexLightColor : TEXCOORD5;
@@ -83,10 +84,12 @@ Interpolators MyVertexProgram (VertexData v)
 	i.uv.xy = TRANSFORM_TEX(v.uv, _MainTex);
 	i.uv.zw = TRANSFORM_TEX(v.uv, _DetailTex);
 
-	#if defined(SHADOWS_SCREEN)
-		i.shadowCoordinates.xy = (i.position.xy + i.position.w) * 0.5; // / i.position.w;
-		i.shadowCoordinates.zw = i.position.zw;
-	#endif
+	//#if defined(SHADOWS_SCREEN)
+		//i.shadowCoordinates = ComputeScreenPos(i.position);
+		//i.shadowCoordinates.xy = (float2(i.position.x - i.position.y) + i.position.w) * 0.5; // / i.position.w;
+		//i.shadowCoordinates.zw = i.position.zw;
+	//#endif
+	TRANSFER_SHADOW(i);
 
 	ComputeVertexLightColor(i);
 	return i;
@@ -102,11 +105,11 @@ UnityLight CreateLight (Interpolators i)
 		light.dir = _WorldSpaceLightPos0.xyz;
 	#endif
 
-	#if defined(SHADOWS_SCREEN)
-		float attenuation = tex2d(_ShadowMapTexture, i.shadowCoordinates.xy / i.shadowCoordinates.w);
-	#else
-		UNITY_LIGHT_ATTENUATION(attenuation, 0, i.worldPos);
-	#endif
+	//#if defined(SHADOWS_SCREEN)
+		//float attenuation = SHADOW_ATTENUATION(i); //tex2d(_ShadowMapTexture, i.shadowCoordinates.xy / i.shadowCoordinates.w);
+	//#else
+		UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+	//#endif
 	
 	light.color = _LightColor0.rgb * attenuation;
 	light.ndotl = DotClamped(i.normal, light.dir);
